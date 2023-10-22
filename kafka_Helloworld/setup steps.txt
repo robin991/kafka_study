@@ -1,0 +1,135 @@
+Check the video https://www.youtube.com/watch?v=w6A-uDEb7JY&list=PLjfRmoYoxpNrs0VmIq6mOTqXP52RfZdRf
+
+1. Download Kafka
+2. Set up Kafka --
+
+Create 2 folders in F drive-- ( unlike video I have kept these folders within the Kafka folder rather than outside
+
+kafka_logs-- zookeeper
+
+kafka_logs-- server_logs
+
+
+
+3. change the zookeeper.properties:
+
+------------------------------------------------------
+
+dataDir=D:/Kafka/kafka_2.13-2.8.1/kafka_logs/zookeeper
+
+maxClientCnxns=1
+
+
+
+This property limits the number of active connections from a host, specified by IP address, to a single ZooKeeper server.
+
+
+
+4. change the server.properties:
+
+----------------------------------------------------
+
+uncomment listeners
+
+log.dirs=D:/Kafka/kafka_2.13-2.8.1/kafka_logs/server_logs
+
+zookeeper.connect=localhost:2181
+
+zookeeper.connection.timeout.ms=60000
+
+
+
+5. Start Zookeeper: ( run in a new terminal)
+
+---------------------------------------
+
+D:/Kafka/kafka_2.13-2.8.1/bin/windows/zookeeper-server-start.bat D:/Kafka/kafka_2.13-2.8.1/config/zookeeper.properties
+
+
+
+6.Start Kafka-server: ( run in a new terminal)
+
+-----------------------------------------
+
+D:/Kafka/kafka_2.13-2.8.1/bin/windows/kafka-server-start.bat D:/Kafka/kafka_2.13-2.8.1/config/server.properties
+
+
+
+7. Create topic: ( run in a new terminal)
+
+------------------------------------
+
+D:/Kafka/kafka_2.13-2.8.1/bin/windows/kafka-topics.bat --create --topic hello_world --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1
+
+
+
+8. Start Producer:( run in 'create topic' terminal)
+
+--------------------------------------
+
+D:/Kafka/kafka_2.13-2.8.1/bin/windows/kafka-console-producer.bat --topic hello_world --bootstrap-server localhost:9092
+
+
+
+9.Start Consumer: ( run in a new terminal)
+
+-------------------------------------
+
+D:/Kafka/kafka_2.13-2.8.1/bin/windows/kafka-console-consumer.bat --topic hello_world --from-beginning --bootstrap-server localhost:9092
+
+
+10. Run demo on 'Start Producer:' terminal
+> will receive response in 'Start Consumer:' terminal.
+
+11. In case we want to run this on a pyhton script then  do so : ( first terminate 'producer' terminal, since no longer needed)
+
+
+kafka-python installation:
+
+--------------------------------------------------
+
+pip install kafka-python
+
+(To know more about this client , you can refer this link :
+
+https://pypi.org/project/kafka-python/)
+
+
+
+Python Code:
+
+----------------------------------
+
+from time import sleep
+
+from json import dumps
+
+from kafka import KafkaProducer
+
+
+
+topic_name='hello_world'
+
+producer = KafkaProducer(bootstrap_servers=['localhost:9092'],value_serializer=lambda x: dumps(x).encode('utf-8'))
+
+
+
+for e in range(1000):
+
+    data = {'number' : e}
+
+    print(data)
+
+    producer.send(topic_name, value=data)
+
+    sleep(5)
+
+#####Video 2: #####
+
+Source:https://www.youtube.com/watch?v=1Hn74td1vu8&list=PLjfRmoYoxpNrs0VmIq6mOTqXP52RfZdRf&index=2
+
+1)Kafka cluster stores messages even if they were already consumed by one of the consumers.
+2)Same messages may be read multiple times by different consumers.
+3)Multiple consumers can read message from Kafka Topic in parallel.
+4)Producers and consumers don't know about each other , they are just doing their own job , first producer don't know anything about the second producer or other consumers , same for other components.
+5)Consumers don't care about the producers which has produced messages , they just consume messages.
